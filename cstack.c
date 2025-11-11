@@ -9,11 +9,8 @@
 
 #define STACK_CREATION_ERR  ((hstack_t)-1)
 
-
-typedef enum stack_entry_status stack_entry_status_t
-
 struct node {
-    const struct node* prev;
+    struct node* prev;
     size_t data_size;
     char *data;
 };
@@ -21,7 +18,7 @@ struct node {
 typedef struct node* stack_t;
 
 struct stack_entry {
-    stack_entry_status_t is_reserved;
+    int is_reserved;
     stack_t stack;  
 };
 
@@ -83,11 +80,11 @@ void stack_free(const hstack_t hstack)
     stack_t current = head;
 
     while (current != NULL) {
-        stack_t prev = current.prev;
+        stack_t prev = current->prev;
             
-        if (current.data != NULL) {
-            free(current.data);
-            current.data = NULL;
+        if (current->data != NULL) {
+            free(current->data);
+            current->data = NULL;
         }
 
         free(current);
@@ -100,7 +97,7 @@ void stack_free(const hstack_t hstack)
 
 int stack_valid_handler(const hstack_t hstack)
 {
-    return g_talbe.entry[(size_t)hstack].is_reserved;
+    return g_table.entry[(size_t)hstack].is_reserved;
 }
 
 unsigned int stack_size(const hstack_t hstack)
