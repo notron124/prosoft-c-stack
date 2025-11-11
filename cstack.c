@@ -75,6 +75,10 @@ hstack_t stack_new(void) {
 
 void stack_free(const hstack_t hstack)
 {
+    if (!stack_valid_handler(hstack)) {
+        return;
+    }
+
     stack_t head = g_table.entry[(size_t)hstack].stack;
 
     stack_t current = head;
@@ -93,10 +97,15 @@ void stack_free(const hstack_t hstack)
     }
     
     g_table.entry[(size_t)hstack].is_reserved = 0;
+    g_table.entry[(size_t)hstack].stack = NULL;
 }
 
 int stack_valid_handler(const hstack_t hstack)
 {
+    if ((size_t)hstack > g_table.size) {
+        return 0;
+    }
+
     return g_table.entry[(size_t)hstack].is_reserved;
 }
 
