@@ -1,6 +1,7 @@
 #include "cstack.h"
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define UNUSED(VAR) (void)(VAR)
 
@@ -75,13 +76,11 @@ hstack_t stack_new(void) {
 
 void stack_free(const hstack_t hstack)
 {
-    if (stack_valid_handler(hstack)) {
+    if (stack_valid_handler(hstack) != 0) {
         return;
     }
 
-    stack_t head = g_table.entry[(size_t)hstack].stack;
-
-    stack_t current = head;
+    stack_t current = g_table.entry[(size_t)hstack].stack;
 
     while (current != NULL) {
         stack_t prev = current->prev;
@@ -100,8 +99,7 @@ void stack_free(const hstack_t hstack)
     g_table.entry[(size_t)hstack].stack = NULL;
 }
 
-int stack_valid_handler(const hstack_t hstack)
-{
+int stack_valid_handler(const hstack_t hstack) {
     if ((size_t)hstack > g_table.size) {
         return 1;
     }
@@ -109,21 +107,45 @@ int stack_valid_handler(const hstack_t hstack)
     return !g_table.entry[(size_t)hstack].is_reserved;
 }
 
-unsigned int stack_size(const hstack_t hstack)
-{
-    UNUSED(hstack);
-    return 0;
+unsigned int stack_size(const hstack_t hstack) {
+    if (stack_valid_handler(hstack) != 0) {
+        return 0;
+    }
+
+    unsigned int size = 0;
+    stack_t current = g_table.entry[(size_t)hstack].stack;
+
+    while (current != NULL) {
+        size++;
+        current = current->prev;
+    }
+
+    return size;
 }
 
-void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
-{
-    UNUSED(hstack);
-    UNUSED(data_in);
-    UNUSED(size);
+void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size) {
+    // Выход на не валидный хендлер/данные
+    if (stack_valid_handler(hstack) != 0 || data_in == NULL || size == 0) {
+        return;
+    }
+        
+    stack_t node = (stack_t)malloc(sizeof(struct node));
+    node->prev = g_table.entry[(size_t)hstack].stack;
+    node->data = (char*)malloc(size);
+        
+    // Выход, если выделение памяти не удалось
+    if (node->data == NULL) {
+       free(node);
+       return;
+    }
+
+    memcpy(node->data, data_in, size);
+    node->data_size = size;
+
+    g_table.entry[(size_t)hstack].stack = node;
 }
 
-unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int size)
-{
+unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int size) {
     UNUSED(hstack);
     UNUSED(data_out);
     UNUSED(size);
