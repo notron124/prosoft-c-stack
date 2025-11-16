@@ -1,4 +1,4 @@
-.PHONY: test release
+.PHONY: test
 
 build-image:	
 	docker build -t prosoft-c-stack .
