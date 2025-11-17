@@ -120,7 +120,7 @@ void stack_free(const hstack_t hstack)
  */
 int stack_valid_handler(const hstack_t hstack) {
     // Провека относительно размера таблицы стеков
-    if ((size_t)hstack > g_table.size) {
+    if ((size_t)hstack >= g_table.size || hstack < 0) {
         return 1;
     }
 
